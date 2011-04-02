@@ -47,7 +47,13 @@ $entry = null;
 if (isset($_SERVER['PATH_INFO'])) {
 	$parts = explode('/', $_SERVER['PATH_INFO']);
 } elseif (isset($_SERVER['REQUEST_URI'])) {
-	$parts = explode('/', urldecode($_SERVER['REQUEST_URI']));
+	// massage the script name's directory out of the path
+	$requestUri = $_SERVER['REQUEST_URI'];
+	$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+	if (isset($_SERVER['SCRIPT_NAME']) && 0 === strpos($requestUri, $scriptDir)) {
+		$requestUri = substr($requestUri, strlen($scriptDir) - 1);
+	}
+	$parts = explode('/', urldecode($requestUri));
 } else {
 	$parts = array();
 }
