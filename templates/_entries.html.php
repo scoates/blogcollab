@@ -1,4 +1,5 @@
-<h1>Select an entry for <?php echo escape($params['user']); ?></h1>
+<h1><a href="../">Blogcollab</a></h1>
+<h2>Select an entry for <?php echo escape($params['user']); ?></h2>
 <ul>
 	<?php
 	$path = escape(rtrim($_SERVER['REQUEST_URI'], '/'));
