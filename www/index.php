@@ -46,6 +46,8 @@ $who = null;
 $entry = null;
 if (isset($_SERVER['PATH_INFO'])) {
 	$parts = explode('/', $_SERVER['PATH_INFO']);
+} elseif (isset($_SERVER['REQUEST_URI'])) {
+	$parts = explode('/', $_SERVER['REQUEST_URI']);
 } else {
 	$parts = array();
 }
