@@ -59,6 +59,18 @@ if ($size > 2) {
 	$entry = $parts[2];
 }
 
+/**
+ * Ensure there are no path shenanigans
+ */
+if (false !== strpos($who, '../') || false !== strpos($entry, '../')) {
+	do_404();
+	$title = $content = 'Invalid path';
+	render(null, compact('content', 'title'));
+}
+
+/**
+ * Trap invalid users -> 404
+ */
 if ($who && !in_array($who, $users)) {
 	do_404();
 	$content = 'invalid user <a href="' . escape($_SERVER['SCRIPT_NAME']) . '">try again?</a>';
