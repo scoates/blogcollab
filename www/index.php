@@ -1,10 +1,27 @@
 <?php
+/**
+ * Really simple blog collaboration system.
+ * The code is nothing special (I whipped it up in an hour or so, one day), but
+ * the app is really useful for collaboration/preview.
+ *
+ * Put user templates in ../templates/{username}
+ * Put content in ../content/{username}/{Title Goes Here}.html
+ */
 
-header('Content-type: text/html;charset=UTF-8');
-
+/**
+ * Helper constants
+ */
 define('USERDIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'content');
 define('TEMPLATEDIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'templates');
 
+/**
+ * Ensure we're in UTF-8.. Unicode is haaaaard.
+ */
+header('Content-type: text/html;charset=UTF-8');
+
+/**
+ * Simple "not found" helper
+ */
 function do_404()
 {
 	if ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.1') {
@@ -15,6 +32,13 @@ function do_404()
 	header("{$prot} 404 Not Found");
 }
 
+/**
+ * Renders a template
+ *
+ * @param string $template the template name (path, but no suffix) to render
+ * @param array $params parameters to pass into the template
+ * @param bool $useDefault if true, wraps the $template in the default layout
+ */
 function render($template, array $params, $useDefault = true)
 {
 	if (null !== $template) {
@@ -30,11 +54,20 @@ function render($template, array $params, $useDefault = true)
 	exit;
 }
 
+/**
+ * Simple helper to escape output
+ *
+ * @param string $str the input string
+ * @return string UTF-8, HTML-escaped string, ready for output
+ */
 function escape($str)
 {
 	return htmlentities($str, ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * Collect users
+ */
 $users = array();
 foreach (new DirectoryIterator(USERDIR) as $fi) {
 	if (!$fi->isDot()) {
@@ -42,8 +75,19 @@ foreach (new DirectoryIterator(USERDIR) as $fi) {
 	}
 }
 
+/**
+ * $who will be the current user, if valid
+ */
 $who = null;
+
+/**
+ * $entry will be the currently-selected template, if valid and set
+ */
 $entry = null;
+
+/**
+ * Split out the path
+ */
 if (isset($_SERVER['PATH_INFO'])) {
 	$parts = explode('/', $_SERVER['PATH_INFO']);
 } elseif (isset($_SERVER['REQUEST_URI'])) {
@@ -84,15 +128,17 @@ if ($who && !in_array($who, $users)) {
 	render(null, compact('content', 'title'));
 }
 
-// TODO: invalid entry
-
-// no user or entry
+/**
+ * no user or entry; have the viewer select a user
+ */
 if (!$who) {
 	$title = 'Select a user';
 	render('_users', compact('title', 'users'));
 }
 
-// has user but no entry
+/**
+ * visitor has selected a user, but not an entry
+ */
 $contentdir = USERDIR . DIRECTORY_SEPARATOR . $who;
 if (!$entry) {
 	if (!file_exists($contentdir)) {
@@ -114,6 +160,9 @@ if (!$entry) {
 	render('_entries', compact('title', 'entries', 'user'));
 }
 
+/**
+ * collect templates
+ */
 $templates = array();
 foreach (new DirectoryIterator(TEMPLATEDIR) as $fi) {
 	if (!$fi->isDot()) {
@@ -123,11 +172,17 @@ foreach (new DirectoryIterator(TEMPLATEDIR) as $fi) {
 		}
 	}
 }
+/**
+ * determine display template
+ */
 $displayTemplate = $who;
 if (!in_array($displayTemplate . '.html.php', $templates)) {
 	$displayTemplate = null;
 }
 
+/**
+ * validate requested content
+ */
 $contentFile = $contentdir . DIRECTORY_SEPARATOR . $entry;
 if (!is_readable($contentFile)) {
 	do_404();
@@ -136,8 +191,21 @@ if (!is_readable($contentFile)) {
 	render(null, compact('title', 'content'));
 }
 
+/**
+ * actually load content from disk (the repository)
+ *
+ * Note: this content is often intentionally not escaped (depends on the
+ * template), so it opens the door to XSS and other nastiness. The assumption
+ * here is that authors (committers) are to be trusted; visitors are not
+ */
 $content = file_get_contents($contentFile);
+/**
+ * Set title from the file name
+ */
 $title = escape(substr($entry, 0, strrpos($entry, '.')));
 
+/**
+ * and finally, render the template
+ */
 render($displayTemplate, compact('title', 'content'), false);
 
