@@ -9,6 +9,29 @@
  */
 
 /**
+ * Authentication constants
+ */
+define('AUTH_USER', 'collab'); // set to false to skip auth check
+define('AUTH_PASS', 'd5029374377771fd628239fd1f4e9d02'); // md5('collab');
+
+/**
+ * Check auth
+ */
+if (AUTH_USER) {
+	if (!(
+		isset($_SERVER['PHP_AUTH_USER'])
+		&& AUTH_USER == $_SERVER['PHP_AUTH_USER']
+		&& isset($_SERVER['PHP_AUTH_PW'])
+		&& AUTH_PASS == md5($_SERVER['PHP_AUTH_PW'])
+	)) {
+		header('WWW-Authenticate: Basic realm="Blogcollab"');
+		header('HTTP/1.0 401 Unauthorized');
+		echo 'You must authenticate to use this site.';
+		exit;
+	}
+}
+
+/**
  * Helper constants
  */
 define('USERDIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'content');
