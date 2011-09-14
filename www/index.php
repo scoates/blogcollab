@@ -97,10 +97,12 @@ if (isset($_SERVER['PATH_INFO'])) {
 } else {
 	$parts = array();
 }
+var_dump($parts);
 if (isset($parts[0]) && '' === $parts[0]) {
 	// trim off the first (empty) element
 	array_shift($parts);
 }
+var_dump($parts);
 $size = count($parts);
 if ($size > 0) {
 	$who = $parts[0];
