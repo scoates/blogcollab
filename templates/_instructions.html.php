@@ -15,4 +15,4 @@ and password (collab/collab), and browse to the example content. (If you're
 seeing this page, you're not logged in.)</p>
 
 <p>Once you're logged in, you can check out my demo post:
-<a href="scoates/Blogcollab%20and%20Orchestra.html">scoates/Blogcollab and Orchestra.html</a></p>
+<a href="http://blogcollab.orchestra.io/scoates/Blogcollab%20and%20Orchestra.html">Blogcollab and Orchestra</a></p>
