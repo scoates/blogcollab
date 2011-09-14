@@ -88,23 +88,25 @@ if (isset($_SERVER['PATH_INFO'])) {
 } elseif (isset($_SERVER['REQUEST_URI'])) {
 	// nginx (orchestra.io)
 	// massage the script name's directory out of the path
-	var_dump($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']); // debugging orchestra
 	$requestUri = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
 	$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
 	if (isset($_SERVER['SCRIPT_NAME']) && 0 === strpos($requestUri, $scriptDir)) {
 		$requestUri = substr($requestUri, strlen($scriptDir));
 	}
 	$parts = explode('/', urldecode($requestUri));
-	var_dump($parts);
 } else {
 	$parts = array();
 }
-$size = count($parts);
-if ($size > 1) {
-	$who = $parts[1];
+if (isset($parts[0]) && '' === $parts[0]) {
+	// trim off the first (empty) element
+	array_shift($parts);
 }
-if ($size > 2) {
-	$entry = $parts[2];
+$size = count($parts);
+if ($size > 0) {
+	$who = $parts[0];
+}
+if ($size > 1) {
+	$entry = $parts[1];
 }
 
 /**
