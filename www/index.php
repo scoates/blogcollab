@@ -1,7 +1,8 @@
 <?php
 /**
  * Really simple blog collaboration system.
- * The code is nothing special (I whipped it up in an hour or so, one day), but
+ * The code is nothing special (I whipped it up in an hour or so, one day, and
+ * spent a whole bunch more time making it ready for public consumption), but
  * the app is really useful for collaboration/preview.
  *
  * Put user templates in ../templates/{username}
@@ -14,28 +15,36 @@
 define('AUTH_USER', 'collab'); // set to false to skip auth check
 define('AUTH_PASS', 'd5029374377771fd628239fd1f4e9d02'); // md5('collab');
 
+$AUTHENTICATED = false;
+
+/**
+ * Library code
+ */
+require dirname(__DIR__) . DIRECTORY_SEPARATOR . 'blogcollab.php';
+
 /**
  * Check auth
  */
 if (AUTH_USER) {
-	if (!(
+	if (
 		isset($_SERVER['PHP_AUTH_USER'])
 		&& AUTH_USER == $_SERVER['PHP_AUTH_USER']
 		&& isset($_SERVER['PHP_AUTH_PW'])
 		&& AUTH_PASS == md5($_SERVER['PHP_AUTH_PW'])
-	)) {
-		header('WWW-Authenticate: Basic realm="Blogcollab"');
-		header('HTTP/1.0 401 Unauthorized');
-		echo 'You must authenticate to use this site.';
-		exit;
+	) {
+		$AUTHENTICATED = true;
+	} else {
+		$AUTHENTICATED = false;
+		if (isset($_GET['dologin']) && $_GET['dologin']) {
+			header('WWW-Authenticate: Basic realm="Blogcollab"');
+			header('HTTP/1.0 401 Unauthorized');
+			exit;
+		}
 	}
+} else {
+	// AUTH_USER is false, pretend we're authenticated
+	$AUTHENTICATED = true;
 }
-
-/**
- * Helper constants
- */
-define('USERDIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'content');
-define('TEMPLATEDIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'templates');
 
 /**
  * Ensure we're in UTF-8.. Unicode is haaaaard.
@@ -43,49 +52,11 @@ define('TEMPLATEDIR', dirname(__DIR__) . DIRECTORY_SEPARATOR . 'templates');
 header('Content-type: text/html;charset=UTF-8');
 
 /**
- * Simple "not found" helper
+ * When not authenticated, show the instructions
  */
-function do_404()
-{
-	if ($_SERVER['SERVER_PROTOCOL'] == 'HTTP/1.1') {
-		$prot = $_SERVER['SERVER_PROTOCOL'];
-	} else {
-		$prot = 'HTTP/1.0';
-	}
-	header("{$prot} 404 Not Found");
-}
-
-/**
- * Renders a template
- *
- * @param string $template the template name (path, but no suffix) to render
- * @param array $params parameters to pass into the template
- * @param bool $useDefault if true, wraps the $template in the default layout
- */
-function render($template, array $params, $useDefault = true)
-{
-	if (null !== $template) {
-		ob_start();
-		include TEMPLATEDIR . DIRECTORY_SEPARATOR . $template . '.html.php';
-		$params['content'] = ob_get_clean();
-	} 
-	if ($useDefault) {
-		include TEMPLATEDIR . DIRECTORY_SEPARATOR . '_default.html.php';
-	} else {
-		echo $params['content'];
-	}
-	exit;
-}
-
-/**
- * Simple helper to escape output
- *
- * @param string $str the input string
- * @return string UTF-8, HTML-escaped string, ready for output
- */
-function escape($str)
-{
-	return htmlentities($str, ENT_QUOTES, 'UTF-8');
+if (!$AUTHENTICATED) {
+	render('_instructions', array());
+	exit();
 }
 
 /**
@@ -112,13 +83,13 @@ $entry = null;
  * Split out the path
  */
 if (isset($_SERVER['PATH_INFO'])) {
-	$parts = explode('/', $_SERVER['PATH_INFO']);
+	$parts = explode('/', preg_replace('/\?.*$/', '', $_SERVER['PATH_INFO']));
 } elseif (isset($_SERVER['REQUEST_URI'])) {
 	// massage the script name's directory out of the path
-	$requestUri = $_SERVER['REQUEST_URI'];
+	$requestUri = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
 	$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
 	if (isset($_SERVER['SCRIPT_NAME']) && 0 === strpos($requestUri, $scriptDir)) {
-		$requestUri = substr($requestUri, strlen($scriptDir) - 1);
+		$requestUri = substr($requestUri, strlen($scriptDir));
 	}
 	$parts = explode('/', urldecode($requestUri));
 } else {
