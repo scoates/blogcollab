@@ -83,9 +83,12 @@ $entry = null;
  * Split out the path
  */
 if (isset($_SERVER['PATH_INFO'])) {
+	// apache
 	$parts = explode('/', preg_replace('/\?.*$/', '', $_SERVER['PATH_INFO']));
 } elseif (isset($_SERVER['REQUEST_URI'])) {
+	// nginx (orchestra.io)
 	// massage the script name's directory out of the path
+	var_dump($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']); // debugging orchestra
 	$requestUri = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
 	$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
 	if (isset($_SERVER['SCRIPT_NAME']) && 0 === strpos($requestUri, $scriptDir)) {
