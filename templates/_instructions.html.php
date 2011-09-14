@@ -13,3 +13,6 @@ protected with straightforward HTTP authentication.</p>
 <p>To get started, <a href="./?dologin=1">log in</a> with the default username
 and password (collab/collab), and browse to the example content. (If you're
 seeing this page, you're not logged in.)</p>
+
+<p>Once you're logged in, you can check out my demo post:
+<a href="scoates/Blogcollab%20and%20Orchestra.html">scoates/Blogcollab and Orchestra.html</a></p>
