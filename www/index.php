@@ -95,6 +95,7 @@ if (isset($_SERVER['PATH_INFO'])) {
 		$requestUri = substr($requestUri, strlen($scriptDir));
 	}
 	$parts = explode('/', urldecode($requestUri));
+	var_dump($parts);
 } else {
 	$parts = array();
 }
