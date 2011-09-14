@@ -83,8 +83,10 @@ $entry = null;
  * Split out the path
  */
 if (isset($_SERVER['PATH_INFO'])) {
+	// apache
 	$parts = explode('/', preg_replace('/\?.*$/', '', $_SERVER['PATH_INFO']));
 } elseif (isset($_SERVER['REQUEST_URI'])) {
+	// nginx (orchestra.io)
 	// massage the script name's directory out of the path
 	$requestUri = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
 	$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
@@ -95,12 +97,16 @@ if (isset($_SERVER['PATH_INFO'])) {
 } else {
 	$parts = array();
 }
-$size = count($parts);
-if ($size > 1) {
-	$who = $parts[1];
+if (isset($parts[0]) && '' === $parts[0]) {
+	// trim off the first (empty) element
+	array_shift($parts);
 }
-if ($size > 2) {
-	$entry = $parts[2];
+$size = count($parts);
+if ($size > 0) {
+	$who = $parts[0];
+}
+if ($size > 1) {
+	$entry = $parts[1];
 }
 
 /**
